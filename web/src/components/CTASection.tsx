@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function CTASection() {
   return (
     <section id="verify" className="py-12 lg:py-20">
@@ -17,18 +19,18 @@ export function CTASection() {
             company dengan fitur enterprise.
           </p>
           <div className="relative flex flex-wrap items-center justify-center gap-3 mt-8">
-            <a
-              href="#dashboard"
-              className="inline-flex items-center px-7 py-3.5 text-base font-semibold text-teal-800 bg-white rounded-lg hover:bg-ink-50 hover:-translate-y-0.5 transition-all shadow-[0_16px_40px_-16px_rgba(0,0,0,0.4)]"
+            <Link
+              href="/register"
+              className="inline-flex items-center px-7 py-3.5 text-base font-semibold text-teal-800 bg-white rounded-lg hover:bg-ink-50 hover:-translate-y-0.5 transition-all shadow-[0_16px_40px-16px_rgba(0,0,0,0.4)]"
             >
               Mulai Gratis
-            </a>
-            <a
-              href="#demo"
+            </Link>
+            <Link
+              href="/programs"
               className="inline-flex items-center px-7 py-3.5 text-base font-semibold text-white border border-white/30 rounded-lg hover:bg-white/10 hover:border-white/60 transition-all"
             >
               Lihat Demo
-            </a>
+            </Link>
           </div>
           <div className="relative text-xs text-white/60 tracking-wider mt-6">
             Tanpa kartu kredit · Setup 5 menit · Hackathon MVP v1.0

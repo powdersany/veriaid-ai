@@ -34,7 +34,7 @@ export function Nav() {
             Lihat Program
           </Link>
           <Link
-            href="#dashboard"
+            href="/register"
             className="inline-flex items-center px-5 py-2.5 text-sm font-semibold text-white bg-teal-800 rounded-lg hover:bg-teal-900 transition-all shadow-[var(--shadow-glow)] hover:shadow-lg hover:-translate-y-px"
           >
             Untuk Organisasi
