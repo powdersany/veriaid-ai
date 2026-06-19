@@ -2,24 +2,55 @@ import Link from "next/link";
 import { DashboardShell } from "@/components/DashboardShell";
 import { ShareModal } from "@/components/ShareModal";
 import { mockPrograms, formatRupiah, getProgress, statusLabel, statusColor } from "@/lib/mock-data";
+import { prisma } from "@/lib/db";
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Dashboard — VeriAid AI",
   description: "Kelola program bantuan Anda. Pantau dana, bukti, dan skor akuntabilitas real-time.",
 };
 
-// Aggregate stats from mock data
-const totalPrograms = mockPrograms.length;
-const totalFundRecorded = mockPrograms.reduce((sum, p) => sum + p.fundReceived, 0);
-const totalAidDelivered = mockPrograms.reduce((sum, p) => sum + p.targetBeneficiary, 0);
-const avgAiScore = Math.round(
-  mockPrograms.reduce((sum, p) => sum + p.aiScore, 0) / mockPrograms.length
-);
-const pendingReview = mockPrograms.filter((p) => p.status === "pending_review").length;
-const verifiedCount = mockPrograms.filter((p) => p.status === "verified").length;
+async function loadStats() {
+  try {
+    const programs = await prisma.aidProgram.findMany();
+    if (programs.length === 0) throw new Error("empty");
+    const totalPrograms = programs.length;
+    const totalFundRecorded = programs.reduce((s, p) => s + p.fundReceived, 0);
+    const totalAidDelivered = programs.reduce((s, p) => s + p.targetBeneficiary, 0);
+    const avgAiScore = Math.round(programs.reduce((s, p) => s + p.aiScore, 0) / programs.length);
+    const pendingReview = programs.filter((p) => p.status === "pending_review").length;
+    const verifiedCount = programs.filter((p) => p.status === "verified").length;
+    return {
+      programs: programs.map((p) => ({
+        ...p,
+        startDate: p.startDate.toISOString(),
+        endDate: p.endDate ? p.endDate.toISOString() : null,
+        coverImage: p.coverImage,
+        status: p.status as "verified" | "in_progress" | "pending_review",
+      })),
+      totalPrograms,
+      totalFundRecorded,
+      totalAidDelivered,
+      avgAiScore,
+      pendingReview,
+      verifiedCount,
+    };
+  } catch {
+    return null;
+  }
+}
 
-export default function DashboardOverviewPage() {
+export default async function DashboardOverviewPage() {
+  const dbStats = await loadStats();
+  const programs = dbStats?.programs ?? mockPrograms;
+  const totalPrograms = dbStats?.totalPrograms ?? mockPrograms.length;
+  const totalFundRecorded = dbStats?.totalFundRecorded ?? mockPrograms.reduce((s, p) => s + p.fundReceived, 0);
+  const totalAidDelivered = dbStats?.totalAidDelivered ?? mockPrograms.reduce((s, p) => s + p.targetBeneficiary, 0);
+  const avgAiScore = dbStats?.avgAiScore ?? Math.round(mockPrograms.reduce((s, p) => s + p.aiScore, 0) / mockPrograms.length);
+  const pendingReview = dbStats?.pendingReview ?? mockPrograms.filter((p) => p.status === "pending_review").length;
+  const verifiedCount = dbStats?.verifiedCount ?? mockPrograms.filter((p) => p.status === "verified").length;
   return (
     <DashboardShell>
       <div className="max-w-6xl mx-auto">
@@ -121,7 +152,7 @@ export default function DashboardOverviewPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-200">
-                {mockPrograms.map((p) => {
+                {programs.map((p) => {
                   const progress = getProgress(p.fundSpent, p.targetFund);
                   return (
                     <tr

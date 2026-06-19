@@ -3,19 +3,15 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardShell } from "@/components/DashboardShell";
+import { useAuth } from "@/lib/auth";
+import { programsApi } from "@/lib/api-client";
+import { categories } from "@/lib/mock-data";
 
 type Step = 1 | 2 | 3;
 
-const categories = [
-  "Bencana Alam",
-  "Kesehatan",
-  "Pendidikan",
-  "Pemberdayaan Ekonomi",
-  "Infrastruktur",
-];
-
 export default function CreateProgramPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [step, setStep] = useState<Step>(1);
   const [form, setForm] = useState({
     title: "",
@@ -27,6 +23,7 @@ export default function CreateProgramPage() {
     targetFund: "",
   });
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const update = (key: keyof typeof form, value: string) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -38,16 +35,28 @@ export default function CreateProgramPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      router.push("/login");
+      return;
+    }
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    const slug = form.title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "")
-      .substring(0, 40);
-    const newId = `${slug}-${Date.now().toString().slice(-4)}`;
-    setSubmitting(false);
-    router.push(`/dashboard/program/${newId}/finance`);
+    setError(null);
+    try {
+      const created = await programsApi.create({
+        title: form.title,
+        category: form.category,
+        location: form.location,
+        description: form.description,
+        targetBeneficiary: Number(form.targetBeneficiary) || 0,
+        aidType: form.aidType,
+        targetFund: Number(form.targetFund) || 0,
+        status: "pending_review",
+      });
+      router.push(`/dashboard/program/${created.program.slug}/finance`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal membuat program");
+      setSubmitting(false);
+    }
   };
 
   return (

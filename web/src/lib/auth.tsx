@@ -1,20 +1,32 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { demoUsers } from "./demo-users";
+/**
+ * Client-side auth context. Calls /api/auth/* with HTTP-only cookies.
+ * Falls back to demo accounts if backend is offline.
+ */
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import { authApi } from "./api-client";
 
 export interface User {
   id: string;
-  name: string;
   email: string;
+  name: string;
   role: "organization" | "volunteer";
-  organization?: string;
-  createdAt: string;
+  organization?: string | null;
+  createdAt?: string;
 }
 
 interface AuthState {
   user: User | null;
   loading: boolean;
+  /** true if connected to backend (vs. local fallback) */
+  online: boolean;
   signIn: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   signUp: (data: {
     name: string;
@@ -23,91 +35,64 @@ interface AuthState {
     role: "organization" | "volunteer";
     organization?: string;
   }) => Promise<{ ok: boolean; error?: string }>;
-  signOut: () => void;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
-const STORAGE_KEY = "veriaid_session";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [online, setOnline] = useState(true);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setUser(JSON.parse(raw));
-    } catch {
-      // ignore
-    }
-    setLoading(false);
+    authApi
+      .me()
+      .then((r) => {
+        setUser(r.user);
+        setOnline(true);
+      })
+      .catch(() => {
+        setOnline(false);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const signIn: AuthState["signIn"] = async (email, password) => {
-    if (!email || !password) {
-      return { ok: false, error: "Email dan password wajib diisi." };
+    try {
+      const r = await authApi.login(email, password);
+      setUser(r.user);
+      setOnline(true);
+      return { ok: true };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Login gagal";
+      return { ok: false, error: msg };
     }
-    if (!email.includes("@")) {
-      return { ok: false, error: "Format email tidak valid." };
-    }
-    if (password.length < 6) {
-      return { ok: false, error: "Password minimal 6 karakter." };
-    }
-    // Check demo accounts first
-    const demo = demoUsers.find(
-      (d) => d.email.toLowerCase() === email.toLowerCase() && d.password === password,
-    );
-    const u: User = demo
-      ? {
-          id: demo.id,
-          name: demo.name,
-          email: demo.email,
-          role: demo.role,
-          organization: demo.organization,
-          createdAt: demo.createdAt,
-        }
-      : {
-          id: `usr_${Date.now()}`,
-          name: email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-          email,
-          role: "organization",
-          createdAt: new Date().toISOString(),
-        };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
-    setUser(u);
-    return { ok: true };
   };
 
   const signUp: AuthState["signUp"] = async (data) => {
-    if (!data.name || !data.email || !data.password) {
-      return { ok: false, error: "Semua field wajib diisi." };
+    try {
+      const r = await authApi.signup(data);
+      setUser(r.user);
+      setOnline(true);
+      return { ok: true };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Pendaftaran gagal";
+      return { ok: false, error: msg };
     }
-    if (!data.email.includes("@")) {
-      return { ok: false, error: "Format email tidak valid." };
-    }
-    if (data.password.length < 6) {
-      return { ok: false, error: "Password minimal 6 karakter." };
-    }
-    const u: User = {
-      id: `usr_${Date.now()}`,
-      name: data.name,
-      email: data.email,
-      role: data.role,
-      organization: data.organization,
-      createdAt: new Date().toISOString(),
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
-    setUser(u);
-    return { ok: true };
   };
 
-  const signOut = () => {
-    localStorage.removeItem(STORAGE_KEY);
+  const signOut: AuthState["signOut"] = async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // ignore
+    }
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, online, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

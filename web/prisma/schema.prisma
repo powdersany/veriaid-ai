@@ -1,0 +1,135 @@
+// VeriAid AI — Database schema
+// 7 models: User, AidProgram, FundRecord, Expense, Evidence, Analysis, ProofLedger
+// Uses SQLite for local dev (zero-config). Switch to PostgreSQL by changing
+// `provider` to "postgresql" and updating DATABASE_URL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  name         String
+  passwordHash String
+  role         String // "organization" | "volunteer"
+  organization String?
+  createdAt    DateTime    @default(now())
+  programs     AidProgram[]
+}
+
+model AidProgram {
+  id                String       @id @default(cuid())
+  title             String
+  category          String
+  location          String
+  description       String
+  targetFund        Int
+  fundReceived      Int          @default(0)
+  fundSpent         Int          @default(0)
+  targetBeneficiary Int
+  aidType           String
+  status            String       @default("pending_review") // verified | in_progress | pending_review
+  aiScore           Int          @default(0)
+  startDate         DateTime
+  endDate           DateTime?
+  coverImage        String?
+  organizer         String
+  // Public-facing URL slug (kebab-case, stable)
+  slug              String       @unique
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  ownerId           String
+  owner             User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  funds      FundRecord[]
+  expenses   Expense[]
+  evidence   Evidence[]
+  analyses   Analysis[]
+  proofChain ProofLedger[]
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([category])
+}
+
+model FundRecord {
+  id        String     @id @default(cuid())
+  programId String
+  program   AidProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  amount    Int
+  source    String // "donor_qris" | "donor_bank" | "internal" | ...
+  donorName String? // optional, can be "Anonim"
+  note      String?
+  createdAt DateTime   @default(now())
+
+  @@index([programId])
+}
+
+model Expense {
+  id        String     @id @default(cuid())
+  programId String
+  program   AidProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  item      String
+  amount    Int
+  category  String // "Paket Bantuan" | "Logistik" | "Operasional" | "SDM"
+  note      String?
+  date      DateTime   @default(now())
+  createdAt DateTime   @default(now())
+
+  @@index([programId])
+}
+
+model Evidence {
+  id        String     @id @default(cuid())
+  programId String
+  program   AidProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  name      String
+  type      String // "foto" | "nota" | "invoice" | "laporan" | "dokumen"
+  size      String // "2.4 MB"
+  url       String? // optional file URL (Vercel Blob / local)
+  status    String     @default("pending") // analyzed | pending | flagged
+  aiNote    String? // AI's annotation
+  ocrData   String? // JSON string of OCR result
+  date      DateTime   @default(now())
+  createdAt DateTime   @default(now())
+
+  @@index([programId])
+}
+
+model Analysis {
+  id           String     @id @default(cuid())
+  programId    String
+  program      AidProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  aiScore      Int
+  // JSON: { financialConsistency: {score, desc}, evidenceVerification: {...}, anomalyDetection: {...}, reportQuality: {...} }
+  breakdown    String
+  // JSON: [{ severity, text, resolved }]
+  detectedIssues String
+  report       String // Generated narrative report (Bahasa Indonesia)
+  createdAt    DateTime   @default(now())
+
+  @@index([programId])
+}
+
+// Immutable append-only ledger. Each entry is a hash chain event.
+model ProofLedger {
+  id            String     @id @default(cuid())
+  programId     String
+  program       AidProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  eventType     String // PROGRAM_CREATED | FUND_RECEIVED | EXPENSE_RECORDED | EVIDENCE_UPLOADED | AI_REVIEWED | REPORT_PUBLISHED
+  // JSON: event payload
+  data          String
+  previousHash  String // 64-char hex
+  currentHash   String // 64-char hex
+  sequence      Int // order within program (0-indexed)
+  timestamp     DateTime   @default(now())
+
+  @@unique([programId, sequence])
+  @@index([programId])
+}

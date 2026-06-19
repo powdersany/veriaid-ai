@@ -1,46 +1,56 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
 import { DashboardShell } from "@/components/DashboardShell";
 import { mockPrograms, formatRupiah, getProgress } from "@/lib/mock-data";
-
-interface Expense {
-  id: string;
-  item: string;
-  amount: number;
-  category: string;
-  date: string;
-  note?: string;
-}
+import { programsApi } from "@/lib/api-client";
+import type { Expense } from "@/lib/types";
 
 const categories = ["Paket Bantuan", "Logistik", "Operasional", "SDM"];
-const initialExpenses: Record<string, Expense[]> = {
-  "flood-relief-demak-2026": [
-    { id: "e1", item: "500 paket makanan", amount: 4_785_000, category: "Paket Bantuan", date: "2026-02-15", note: "Distribusi ke 3 kecamatan" },
-    { id: "e2", item: "Sewa truk distribusi", amount: 2_436_000, category: "Logistik", date: "2026-02-14" },
-    { id: "e3", item: "Koordinator lapangan (3 org × 1 bulan)", amount: 1_500_000, category: "SDM", date: "2026-02-01" },
-  ],
-  "stunting-prevention-semarang": [
-    { id: "e1", item: "200 paket Gizi Bunda", amount: 8_500_000, category: "Paket Bantuan", date: "2026-02-20" },
-    { id: "e2", item: "Konsultan gizi (2 org × 2 bulan)", amount: 3_800_000, category: "SDM", date: "2026-02-05" },
-  ],
-};
 
 export default function FinancePage() {
   const params = useParams<{ id: string }>();
   const program = mockPrograms.find((p) => p.id === params.id);
 
-  const [expenses, setExpenses] = useState<Expense[]>(
-    initialExpenses[params.id] || []
-  );
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     item: "",
     amount: "",
     category: categories[0],
     note: "",
   });
+
+  // Load expenses for this program
+  useEffect(() => {
+    if (!params.id) return;
+    programsApi
+      .get(params.id)
+      .then((r) => {
+        setExpenses(
+          r.expenses.map((e) => ({
+            id: e.id,
+            programId: e.programId,
+            item: e.item,
+            amount: e.amount,
+            category: e.category,
+            date: typeof e.date === "string" ? e.date.split("T")[0] : new Date(e.date).toISOString().split("T")[0],
+            note: e.note ?? undefined,
+          })),
+        );
+      })
+      .catch(() => {
+        // Fallback to localStorage-cached data
+        try {
+          const cached = localStorage.getItem(`veriaid:expenses:${params.id}`);
+          if (cached) setExpenses(JSON.parse(cached));
+        } catch {}
+      })
+      .finally(() => setLoading(false));
+  }, [params.id]);
 
   if (!program) {
     notFound();
@@ -50,19 +60,55 @@ export default function FinancePage() {
   const remaining = program.fundReceived - spent;
   const progress = Math.min(100, Math.round((spent / program.targetFund) * 100));
 
-  const handleAdd = (e: FormEvent) => {
+  const handleAdd = async (e: FormEvent) => {
     e.preventDefault();
     if (!form.item || !form.amount) return;
-    const newExp: Expense = {
-      id: `e_${Date.now()}`,
-      item: form.item,
-      amount: Number(form.amount),
-      category: form.category,
-      date: new Date().toISOString().split("T")[0],
-      note: form.note || undefined,
-    };
-    setExpenses((prev) => [newExp, ...prev]);
-    setForm({ item: "", amount: "", category: categories[0], note: "" });
+    setSubmitting(true);
+    try {
+      const result = await programsApi.recordExpense(params.id, {
+        item: form.item,
+        amount: Number(form.amount),
+        category: form.category,
+        note: form.note || undefined,
+      });
+      const newExp: Expense = {
+        id: result.expense.id,
+        programId: result.expense.programId,
+        item: result.expense.item,
+        amount: result.expense.amount,
+        category: result.expense.category,
+        date:
+          typeof result.expense.date === "string"
+            ? result.expense.date.split("T")[0]
+            : new Date(result.expense.date).toISOString().split("T")[0],
+        note: result.expense.note ?? undefined,
+      };
+      const next = [newExp, ...expenses];
+      setExpenses(next);
+      try {
+        localStorage.setItem(`veriaid:expenses:${params.id}`, JSON.stringify(next));
+      } catch {}
+      setForm({ item: "", amount: "", category: categories[0], note: "" });
+    } catch (err) {
+      // Optimistic local fallback if API offline
+      const newExp: Expense = {
+        id: `e_${Date.now()}`,
+        programId: params.id,
+        item: form.item,
+        amount: Number(form.amount),
+        category: form.category,
+        date: new Date().toISOString().split("T")[0],
+        note: form.note || undefined,
+      };
+      const next = [newExp, ...expenses];
+      setExpenses(next);
+      try {
+        localStorage.setItem(`veriaid:expenses:${params.id}`, JSON.stringify(next));
+      } catch {}
+      setForm({ item: "", amount: "", category: categories[0], note: "" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -149,12 +195,13 @@ export default function FinancePage() {
               />
               <button
                 type="submit"
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-teal-800 rounded-lg hover:bg-teal-900 transition-colors"
+                disabled={submitting}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-teal-800 rounded-lg hover:bg-teal-900 transition-colors disabled:opacity-60"
               >
                 <svg className="w-4 h-4" viewBox="0 0 20 20" fill="none">
                   <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                 </svg>
-                Tambah Pengeluaran
+                {submitting ? "Menyimpan…" : "Tambah Pengeluaran"}
               </button>
             </form>
           </div>
