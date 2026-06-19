@@ -26,7 +26,7 @@ export function Footer() {
             <Link href="#verify" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
               Verifikasi Laporan
             </Link>
-            <Link href="#dashboard" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
+            <Link href="/register" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
               Untuk Organisasi
             </Link>
           </div>
