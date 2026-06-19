@@ -1,7 +1,10 @@
 import type { MetadataRoute } from "next";
+import { prisma } from "@/lib/db";
 import { mockPrograms } from "@/lib/mock-data";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const dynamic = "force-dynamic";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = "https://veriaid.example.com";
   const now = new Date();
 
@@ -12,19 +15,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/register`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
   ];
 
-  const programEntries: MetadataRoute.Sitemap = mockPrograms.flatMap((p) => [
-    {
-      url: `${base}/program/${p.id}`,
-      lastModified: now,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    },
-    {
-      url: `${base}/proof/${p.id}`,
-      lastModified: now,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    },
+  let slugs: string[] = [];
+  try {
+    const rows = await prisma.aidProgram.findMany({ select: { slug: true } });
+    slugs = rows.map((r) => r.slug);
+  } catch {
+    slugs = mockPrograms.map((p) => p.id);
+  }
+  if (slugs.length === 0) slugs = mockPrograms.map((p) => p.id);
+
+  const programEntries: MetadataRoute.Sitemap = slugs.flatMap((id) => [
+    { url: `${base}/program/${id}`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.8 },
+    { url: `${base}/proof/${id}`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.7 },
   ]);
 
   return [...staticEntries, ...programEntries];

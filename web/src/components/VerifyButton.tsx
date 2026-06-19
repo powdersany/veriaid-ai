@@ -2,17 +2,47 @@
 
 import { useState } from "react";
 
-export function VerifyButton({ valid }: { valid: boolean }) {
+interface Props {
+  valid: boolean;
+  hash?: string;
+}
+
+export function VerifyButton({ valid, hash }: Props) {
   const [verifying, setVerifying] = useState(false);
   const [result, setResult] = useState<"valid" | "invalid" | null>(valid ? "valid" : null);
+  const [apiResult, setApiResult] = useState<string | null>(null);
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
+    if (!hash) {
+      setVerifying(true);
+      setResult(null);
+      setTimeout(() => {
+        setVerifying(false);
+        setResult("valid");
+      }, 1500);
+      return;
+    }
     setVerifying(true);
     setResult(null);
-    setTimeout(() => {
+    setApiResult(null);
+    try {
+      const r = await fetch(`/api/verify/${hash}`);
+      const data = await r.json();
+      if (data.valid) {
+        setResult("valid");
+        setApiResult(
+          `Event: ${data.event?.type ?? "?"} · ${new Date(data.event?.timestamp ?? "").toLocaleString("id-ID")}`,
+        );
+      } else {
+        setResult("invalid");
+        setApiResult(data.reason ?? "Hash tidak valid atau tidak ditemukan.");
+      }
+    } catch (e) {
+      setResult("invalid");
+      setApiResult(e instanceof Error ? e.message : "Network error");
+    } finally {
       setVerifying(false);
-      setResult("valid");
-    }, 1800);
+    }
   };
 
   return (
@@ -51,9 +81,22 @@ export function VerifyButton({ valid }: { valid: boolean }) {
           <div className="flex-1">
             <div className="font-bold text-success">Valid — Integrity Terjaga</div>
             <div className="text-sm text-ink-600">
-              Hash chain konsisten dari genesis ke event terbaru. Laporan tidak
-              dimodifikasi sejak dipublikasikan.
+              {apiResult ?? "Hash chain konsisten dari genesis ke event terbaru. Laporan tidak dimodifikasi sejak dipublikasikan."}
             </div>
+          </div>
+        </div>
+      )}
+
+      {result === "invalid" && (
+        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <div className="w-8 h-8 rounded-full bg-danger flex items-center justify-center flex-shrink-0">
+            <svg className="w-5 h-5 text-white" viewBox="0 0 20 20" fill="none">
+              <path d="M6 6l8 8M6 14L14 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <div className="font-bold text-danger">Tidak Valid</div>
+            <div className="text-sm text-ink-600">{apiResult ?? "Hash tidak cocok dengan chain."}</div>
           </div>
         </div>
       )}

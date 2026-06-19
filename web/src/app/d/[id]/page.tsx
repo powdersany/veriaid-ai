@@ -1,8 +1,11 @@
+export const dynamic = "force-dynamic";
+
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { QrisButton, TransferButton } from "@/components/PaymentInfoModal";
+import { prisma } from "@/lib/db";
 import {
   mockPrograms,
   formatRupiah,
@@ -20,7 +23,9 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const program = mockPrograms.find((p) => p.id === id);
+  const program =
+    (await prisma.aidProgram.findFirst({ where: { OR: [{ id }, { slug: id }] } })) ??
+    mockPrograms.find((p) => p.id === id);
   if (!program) {
     return { title: "Program tidak ditemukan · VeriAid AI" };
   }
@@ -32,7 +37,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function DonatePage({ params }: PageProps) {
   const { id } = await params;
-  const program = mockPrograms.find((p) => p.id === id);
+  const dbProgram = await prisma.aidProgram.findFirst({
+    where: { OR: [{ id }, { slug: id }] },
+  });
+  const program = dbProgram
+    ? {
+        ...dbProgram,
+        startDate: dbProgram.startDate.toISOString(),
+        endDate: dbProgram.endDate ? dbProgram.endDate.toISOString() : null,
+        status: dbProgram.status as "verified" | "in_progress" | "pending_review",
+      }
+    : mockPrograms.find((p) => p.id === id);
 
   if (!program) {
     notFound();

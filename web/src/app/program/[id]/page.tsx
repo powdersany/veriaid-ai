@@ -2,20 +2,25 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { prisma } from "@/lib/db";
 import { mockPrograms, formatRupiah, getProgress, statusLabel, statusColor } from "@/lib/mock-data";
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export function generateStaticParams() {
-  return mockPrograms.map((p) => ({ id: p.id }));
+async function getProgram(idOrSlug: string) {
+  return prisma.aidProgram.findFirst({
+    where: { OR: [{ id: idOrSlug }, { slug: idOrSlug }] },
+  });
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const program = mockPrograms.find((p) => p.id === id);
+  const program = (await getProgram(id)) ?? mockPrograms.find((p) => p.id === id);
   if (!program) return { title: "Program tidak ditemukan — VeriAid AI" };
   return {
     title: `${program.title} — VeriAid AI`,
@@ -51,7 +56,16 @@ const recentActivity = [
 
 export default async function ProgramDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const program = mockPrograms.find((p) => p.id === id);
+  const dbProgram = await getProgram(id);
+  const program = dbProgram
+    ? {
+        ...dbProgram,
+        startDate: dbProgram.startDate.toISOString(),
+        endDate: dbProgram.endDate ? dbProgram.endDate.toISOString() : undefined,
+        coverImage: dbProgram.coverImage ?? undefined,
+        status: dbProgram.status as "verified" | "in_progress" | "pending_review",
+      }
+    : mockPrograms.find((p) => p.id === id);
   if (!program) notFound();
 
   const progress = getProgress(program.fundSpent, program.targetFund);

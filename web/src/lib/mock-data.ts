@@ -14,8 +14,8 @@ export interface AidProgram {
   status: ProgramStatus;
   aiScore: number;
   startDate: string;
-  endDate?: string;
-  coverImage?: string;
+  endDate?: string | null;
+  coverImage?: string | null;
   organizer: string;
 }
 

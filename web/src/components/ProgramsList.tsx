@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ProgramCard } from "@/components/ProgramCard";
 import {
   mockPrograms,
   categories,
-  type AidProgram,
+  type AidProgram as MockAidProgram,
 } from "@/lib/mock-data";
+import { programsApi } from "@/lib/api-client";
+import type { AidProgram } from "@/lib/types";
 
 type SortKey = "newest" | "largest" | "highest_score";
 
@@ -14,9 +16,23 @@ export function ProgramsList() {
   const [category, setCategory] = useState("Semua");
   const [sort, setSort] = useState<SortKey>("newest");
   const [search, setSearch] = useState("");
+  const [programs, setPrograms] = useState<AidProgram[]>(
+    mockPrograms as unknown as AidProgram[],
+  );
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    programsApi
+      .list()
+      .then((r) => {
+        if (r.programs.length > 0) setPrograms(r.programs);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   const filtered = useMemo<AidProgram[]>(() => {
-    let result = [...mockPrograms];
+    let result = [...programs];
     if (category !== "Semua") {
       result = result.filter((p) => p.category === category);
     }
@@ -40,7 +56,7 @@ export function ProgramsList() {
       result.sort((a, b) => b.aiScore - a.aiScore);
     }
     return result;
-  }, [category, sort, search]);
+  }, [programs, category, sort, search]);
 
   return (
     <section className="section-spacing">

@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, type DragEvent, type FormEvent } from "react";
+import { useState, useEffect, type DragEvent, type FormEvent } from "react";
 import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
 import { DashboardShell } from "@/components/DashboardShell";
 import { mockPrograms } from "@/lib/mock-data";
+import { programsApi } from "@/lib/api-client";
+import type { Evidence } from "@/lib/types";
 
 type EvidenceType = "foto" | "nota" | "invoice" | "laporan" | "dokumen";
 
-interface Evidence {
+interface LocalEvidence {
   id: string;
   name: string;
   type: EvidenceType;
@@ -18,16 +20,6 @@ interface Evidence {
   aiNote?: string;
 }
 
-const initialEvidence: Record<string, Evidence[]> = {
-  "flood-relief-demak-2026": [
-    { id: "ev1", name: "Distribusi_Demak_3kec.jpg", type: "foto", size: "2.4 MB", date: "2026-02-22", status: "analyzed", aiNote: "Cocok dengan data penerima" },
-    { id: "ev2", name: "Nota_pembelian_paket.pdf", type: "nota", size: "184 KB", date: "2026-02-20", status: "analyzed", aiNote: "OCR: Rp 4.785.000 terdeteksi" },
-    { id: "ev3", name: "Invoice_logistik_2.pdf", type: "invoice", size: "92 KB", date: "2026-02-19", status: "flagged", aiNote: "Nomor invoice duplikat terdeteksi" },
-    { id: "ev4", name: "Foto_sebelum_distribusi.jpg", type: "foto", size: "1.8 MB", date: "2026-02-18", status: "analyzed" },
-    { id: "ev5", name: "Laporan_koordinator.docx", type: "laporan", size: "78 KB", date: "2026-02-15", status: "pending" },
-  ],
-};
-
 const typeIcon: Record<EvidenceType, string> = {
   foto: "M3 7h18M3 12h18M3 17h18",
   nota: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
@@ -36,27 +28,63 @@ const typeIcon: Record<EvidenceType, string> = {
   dokumen: "M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z",
 };
 
-const statusInfo: Record<Evidence["status"], { label: string; class: string }> = {
+const statusInfo: Record<LocalEvidence["status"], { label: string; class: string }> = {
   analyzed: { label: "Selesai Dianalisis", class: "bg-green-50 text-success" },
   pending: { label: "Antre AI", class: "bg-amber-50 text-warning" },
   flagged: { label: "Anomali Terdeteksi", class: "bg-red-50 text-danger" },
 };
 
+function toLocal(e: Evidence): LocalEvidence {
+  const validStatus: LocalEvidence["status"] =
+    e.status === "analyzed" || e.status === "flagged" ? e.status : "pending";
+  return {
+    id: e.id,
+    name: e.name,
+    type: (e.type as EvidenceType) ?? "dokumen",
+    size: e.size,
+    date: typeof e.date === "string" ? e.date.split("T")[0] : new Date(e.date).toISOString().split("T")[0],
+    status: validStatus,
+    aiNote: e.aiNote ?? undefined,
+  };
+}
+
 export default function EvidencePage() {
   const params = useParams<{ id: string }>();
   const program = mockPrograms.find((p) => p.id === params.id);
 
-  const [items, setItems] = useState<Evidence[]>(initialEvidence[params.id] || []);
+  const [items, setItems] = useState<LocalEvidence[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedType, setSelectedType] = useState<EvidenceType>("foto");
+
+  // Load evidence from backend
+  useEffect(() => {
+    if (!params.id) return;
+    programsApi
+      .get(params.id)
+      .then((r) => setItems(r.evidence.map(toLocal)))
+      .catch(() => {
+        try {
+          const cached = localStorage.getItem(`veriaid:evidence:${params.id}`);
+          if (cached) setItems(JSON.parse(cached));
+        } catch {}
+      });
+  }, [params.id]);
 
   if (!program) {
     notFound();
   }
 
-  const handleFiles = (files: FileList | null) => {
+  const persistLocal = (next: LocalEvidence[]) => {
+    try {
+      localStorage.setItem(`veriaid:evidence:${params.id}`, JSON.stringify(next));
+    } catch {}
+  };
+
+  const handleFiles = async (files: FileList | null) => {
     if (!files) return;
-    const newItems: Evidence[] = Array.from(files).map((f) => ({
+    const fileArr = Array.from(files);
+    // Optimistic local first
+    const optimistic: LocalEvidence[] = fileArr.map((f) => ({
       id: `ev_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
       name: f.name,
       type: selectedType,
@@ -64,7 +92,30 @@ export default function EvidencePage() {
       date: new Date().toISOString().split("T")[0],
       status: "pending",
     }));
-    setItems((prev) => [...newItems, ...prev]);
+    const next = [...optimistic, ...items];
+    setItems(next);
+    persistLocal(next);
+
+    // Try backend upload (metadata only in MVP)
+    for (let i = 0; i < fileArr.length; i++) {
+      const f = fileArr[i];
+      const opt = optimistic[i];
+      try {
+        const result = await programsApi.uploadEvidence(params.id, {
+          name: f.name,
+          type: selectedType,
+          size: opt.size,
+        });
+        const updated = result.evidence;
+        setItems((prev) =>
+          prev.map((it) =>
+            it.id === opt.id ? toLocal(updated) : it,
+          ),
+        );
+      } catch {
+        // keep optimistic entry if backend offline
+      }
+    }
   };
 
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
