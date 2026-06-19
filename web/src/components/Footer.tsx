@@ -20,10 +20,10 @@ export function Footer() {
             <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-4">
               Platform
             </h4>
-            <Link href="#programs" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
+            <Link href="/programs" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
               Program Bantuan
             </Link>
-            <Link href="#verify" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
+            <Link href="/#verify" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
               Verifikasi Laporan
             </Link>
             <Link href="/register" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
@@ -34,13 +34,13 @@ export function Footer() {
             <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-4">
               Resources
             </h4>
-            <Link href="#cara-kerja" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
+            <Link href="/#cara-kerja" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
               Cara Kerja
             </Link>
-            <Link href="#teknologi" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
+            <Link href="/#teknologi" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
               Teknologi
             </Link>
-            <Link href="#api" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
+            <Link href="/docs" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
               API Docs
             </Link>
           </div>
@@ -48,13 +48,13 @@ export function Footer() {
             <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-4">
               Company
             </h4>
-            <Link href="#about" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
+            <Link href="/about" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
               Tentang
             </Link>
-            <Link href="#contact" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
+            <Link href="/contact" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
               Kontak
             </Link>
-            <Link href="#privacy" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
+            <Link href="/privacy" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
               Privasi
             </Link>
           </div>
