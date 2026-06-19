@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand */
+  --color-teal-900: #082F3A;
+  --color-teal-800: #0F4C5C;
+  --color-teal-600: #1B8A8A;
+  --color-teal-500: #2BA9A9;
+  --color-gold-500: #E8A23B;
+  --color-gold-400: #F4B968;
+
+  /* Neutrals */
+  --color-ink-900: #0F1117;
+  --color-ink-800: #1A1D29;
+  --color-ink-700: #2D3142;
+  --color-ink-500: #6B7280;
+  --color-ink-400: #9CA3AF;
+  --color-ink-300: #D1D5DB;
+  --color-ink-200: #E5E7EB;
+  --color-ink-100: #F2F4F7;
+  --color-ink-50: #F8F9FB;
+
+  /* Semantic */
+  --color-success: #16A34A;
+  --color-warning: #F59E0B;
+  --color-danger: #DC2626;
+
+  /* Typography */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", sans-serif;
+
+  /* Radii */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+
+  /* Shadows */
+  --shadow-glow: 0 0 0 1px rgba(27, 138, 138, 0.18), 0 16px 40px -16px rgba(27, 138, 138, 0.32);
+  --shadow-card: 0 4px 16px rgba(15, 17, 23, 0.06), 0 1px 3px rgba(15, 17, 23, 0.04);
+  --shadow-card-lg: 0 24px 48px -12px rgba(15, 17, 23, 0.18);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink-800);
+  background: white;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reusable utilities */
+@utility text-gradient {
+  background: linear-gradient(135deg, var(--color-teal-600) 0%, var(--color-teal-500) 50%, var(--color-gold-500) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility container-page {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1rem, 3vw, 2rem);
+  padding-right: clamp(1rem, 3vw, 2rem);
+}
+
+@utility glass-nav {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(15, 17, 23, 0.06);
+}
+
+@utility section-spacing {
+  padding-top: clamp(4rem, 8vw, 7rem);
+  padding-bottom: clamp(4rem, 8vw, 7rem);
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(43, 169, 169, 0.18); }
+  50% { box-shadow: 0 0 0 8px rgba(43, 169, 169, 0); }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}
