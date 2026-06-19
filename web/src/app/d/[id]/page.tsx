@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { QrisButton, TransferButton } from "@/components/PaymentInfoModal";
 import {
   mockPrograms,
   formatRupiah,
@@ -129,28 +130,15 @@ export default async function DonatePage({ params }: PageProps) {
             </div>
 
             <div className="p-6 lg:p-8 flex flex-wrap gap-3 justify-end bg-ink-50/50">
-              <Link
-                href="#"
-                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-teal-800 rounded-lg hover:bg-teal-900 transition-all shadow-[var(--shadow-glow)] hover:-translate-y-0.5"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 20 20" fill="none">
-                  <path
-                    d="M10 3v10m0 0l-4-4m4 4l4-4M3 17h14"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                Donasi Sekarang
-              </Link>
+              <QrisButton programTitle={program.title} />
+              <TransferButton programTitle={program.title} />
               <button
                 type="button"
                 className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-ink-800 bg-white border border-ink-200 rounded-lg hover:border-teal-500 hover:text-teal-800 hover:bg-ink-50 transition-all"
               >
                 <svg className="w-4 h-4" viewBox="0 0 20 20" fill="none">
                   <path
-                    d="M3 8a7 7 0 0114 0v3a2 2 0 01-2 2h-1v-7h3M3 8v3a2 2 0 002 2h1v-7H3"
+                    d="M15 8a3 3 0 10-6 0M5 12a3 3 0 100-6M15 18a3 3 0 100-6M5 12v0a3 3 0 003 3h0"
                     stroke="currentColor"
                     strokeWidth="1.6"
                     strokeLinecap="round"
@@ -366,18 +354,8 @@ export default async function DonatePage({ params }: PageProps) {
               saja.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
-              <Link
-                href="#"
-                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-ink-900 bg-white rounded-lg hover:bg-ink-100 transition-colors"
-              >
-                Donasi via QRIS
-              </Link>
-              <Link
-                href="#"
-                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-teal-700 rounded-lg hover:bg-teal-600 transition-colors border border-teal-600"
-              >
-                Transfer Bank
-              </Link>
+              <QrisButton programTitle={program.title} />
+              <TransferButton programTitle={program.title} />
             </div>
             <p className="text-xs text-white/50 mt-6 tracking-wider">
               Hackathon MVP v1.0 · Payment gateway coming soon
