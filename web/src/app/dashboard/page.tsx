@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DashboardShell } from "@/components/DashboardShell";
+import { ShareModal } from "@/components/ShareModal";
 import { mockPrograms, formatRupiah, getProgress, statusLabel, statusColor } from "@/lib/mock-data";
 import type { Metadata } from "next";
 
@@ -170,15 +171,21 @@ export default function DashboardOverviewPage() {
                         </span>
                       </td>
                       <td className="px-5 py-4 text-right">
-                        <Link
-                          href={`/dashboard/program/${p.id}/finance`}
-                          className="inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:text-teal-900"
-                        >
-                          Kelola
-                          <svg className="w-3 h-3" viewBox="0 0 20 20" fill="none">
-                            <path d="M4 10h12m-4-4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </Link>
+                        <div className="inline-flex items-center gap-2 justify-end">
+                          <ShareModal
+                            programId={p.id}
+                            programTitle={p.title}
+                          />
+                          <Link
+                            href={`/dashboard/program/${p.id}/finance`}
+                            className="inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:text-teal-900"
+                          >
+                            Kelola
+                            <svg className="w-3 h-3" viewBox="0 0 20 20" fill="none">
+                              <path d="M4 10h12m-4-4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   );

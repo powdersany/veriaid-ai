@@ -161,3 +161,76 @@ export function formatRupiah(amount: number): string {
 export function getProgress(fundSpent: number, targetFund: number): number {
   return Math.min(100, Math.round((fundSpent / targetFund) * 100));
 }
+
+// Generate a stable pseudo-SHA256 hash from program ID for demo display
+export function generateMockHash(programId: string): string {
+  let hash = 0;
+  for (let i = 0; i < programId.length; i++) {
+    const chr = programId.charCodeAt(i);
+    hash = (hash << 5) - hash + chr;
+    hash |= 0;
+  }
+  let hex = Math.abs(hash).toString(16);
+  while (hex.length < 8) hex = "0" + hex;
+  const head = hex;
+  const tail = hex.slice(0, 4);
+  return `0x${head}${head}${head}${head}...${tail}`;
+}
+
+// Generate mock transaction feed for donation page
+interface MockTransaction {
+  id: string;
+  type: "donation" | "expense" | "distribution";
+  description: string;
+  actor: string;
+  amount: number;
+  date: string;
+}
+
+export function generateMockTransactions(programId: string, count: number): MockTransaction[] {
+  const donors = ["Anonim", "Budi S.", "Siti R.", "Ahmad F.", "Dewi K.", "Pak Hartono"];
+  const expenseLabels = [
+    "Pembelian paket makanan",
+    "Distribusi logistik",
+    "Sewa armada distribusi",
+    "Honor tim lapangan",
+    "Pembelian obat-obatan",
+  ];
+  const distLabels = [
+    "Distribusi ke Desa A",
+    "Distribusi ke Kecamatan B",
+    "Penyaluran ke 50 keluarga",
+    "Distribusi batch #3",
+  ];
+  const out: MockTransaction[] = [];
+  const seed = programId.length;
+  for (let i = 0; i < count; i++) {
+    const t = (seed + i) % 7;
+    const isDonation = t < 4;
+    const isExpense = t >= 4 && t < 6;
+    const amount = isDonation
+      ? 50_000 + ((seed * (i + 1) * 7) % 950) * 1000
+      : isExpense
+      ? 200_000 + ((seed * (i + 1) * 11) % 800) * 1000
+      : 150_000 + ((seed * (i + 1) * 13) % 600) * 1000;
+    out.push({
+      id: `${programId}-tx-${i}`,
+      type: isDonation ? "donation" : isExpense ? "expense" : "distribution",
+      description: isDonation
+        ? "Donasi via QRIS"
+        : isExpense
+        ? expenseLabels[i % expenseLabels.length]
+        : distLabels[i % distLabels.length],
+      actor: isDonation
+        ? donors[(seed + i) % donors.length]
+        : `${programId.split("-")[0]}-organizer`,
+      amount,
+      date: new Date(Date.now() - (i + 1) * 86_400_000).toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
+    });
+  }
+  return out;
+}
