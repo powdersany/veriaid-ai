@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { demoUsers } from "./demo-users";
 
 export interface User {
   id: string;
@@ -52,13 +53,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (password.length < 6) {
       return { ok: false, error: "Password minimal 6 karakter." };
     }
-    const u: User = {
-      id: `usr_${Date.now()}`,
-      name: email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-      email,
-      role: "organization",
-      createdAt: new Date().toISOString(),
-    };
+    // Check demo accounts first
+    const demo = demoUsers.find(
+      (d) => d.email.toLowerCase() === email.toLowerCase() && d.password === password,
+    );
+    const u: User = demo
+      ? {
+          id: demo.id,
+          name: demo.name,
+          email: demo.email,
+          role: demo.role,
+          organization: demo.organization,
+          createdAt: demo.createdAt,
+        }
+      : {
+          id: `usr_${Date.now()}`,
+          name: email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+          email,
+          role: "organization",
+          createdAt: new Date().toISOString(),
+        };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
     setUser(u);
     return { ok: true };

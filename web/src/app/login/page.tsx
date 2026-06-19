@@ -151,6 +151,54 @@ export default function LoginPage() {
           <p className="text-xs text-center text-ink-400 mt-6">
             Demo: gunakan email apapun + password minimal 6 karakter
           </p>
+
+          <div className="mt-4 p-4 bg-gradient-to-br from-teal-50 to-amber-50 border border-teal-200 rounded-xl">
+            <p className="text-xs font-bold text-teal-800 uppercase tracking-wider mb-2">
+              Akun Demo (1-klik login)
+            </p>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("demo@veriaid.ai");
+                  setPassword("veriaid2026");
+                }}
+                className="w-full flex items-center justify-between p-3 bg-white rounded-lg border border-teal-200 hover:border-teal-500 hover:bg-teal-50 transition-colors text-left group"
+              >
+                <div>
+                  <div className="text-sm font-semibold text-ink-900">
+                    Syahnahl (Demo Owner)
+                  </div>
+                  <div className="text-xs text-ink-500 font-mono mt-0.5">
+                    demo@veriaid.ai · veriaid2026
+                  </div>
+                </div>
+                <span className="text-xs font-semibold text-teal-700 group-hover:text-teal-900">
+                  Isi →
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("volunteer@veriaid.ai");
+                  setPassword("veriaid2026");
+                }}
+                className="w-full flex items-center justify-between p-3 bg-white rounded-lg border border-teal-200 hover:border-teal-500 hover:bg-teal-50 transition-colors text-left group"
+              >
+                <div>
+                  <div className="text-sm font-semibold text-ink-900">
+                    Rina志愿者 (Demo Volunteer)
+                  </div>
+                  <div className="text-xs text-ink-500 font-mono mt-0.5">
+                    volunteer@veriaid.ai · veriaid2026
+                  </div>
+                </div>
+                <span className="text-xs font-semibold text-teal-700 group-hover:text-teal-900">
+                  Isi →
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </main>
