@@ -269,7 +269,18 @@ async function buildChain(programId: string, ownerId: string) {
 async function main() {
   console.log("🌱 Seeding VeriAid AI database...");
 
-  // Wipe existing data
+  // SAFETY: skip if DB already has data (idempotent guard against wiping
+  // production user data on every Vercel build).
+  const existingUserCount = await prisma.user.count();
+  if (existingUserCount > 0) {
+    console.log(
+      `⏭️  DB already has ${existingUserCount} user(s) — skipping seed. ` +
+      `Set FORCE_RESEED=1 env var to force re-seed (destructive).`
+    );
+    return;
+  }
+
+  // Wipe existing data (only when DB is empty)
   await prisma.proofLedger.deleteMany();
   await prisma.analysis.deleteMany();
   await prisma.evidence.deleteMany();
