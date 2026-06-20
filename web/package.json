@@ -11,7 +11,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "rm -f prisma/dev.db && prisma db push && tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate && prisma db push --skip-generate --accept-data-loss"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
