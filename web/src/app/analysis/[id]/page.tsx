@@ -155,7 +155,7 @@ export default function AnalysisPage() {
             </div>
             <h3 className="font-display text-lg font-bold text-ink-900 mb-1">Belum ada analisis AI</h3>
             <p className="text-sm text-ink-500 mb-4">
-              Klik tombol "Jalankan Analisis AI" untuk generate skor akuntabilitas & rekomendasi.
+              Klik tombol &ldquo;Jalankan Analisis AI&rdquo; untuk generate skor akuntabilitas &amp; rekomendasi.
             </p>
           </div>
         ) : (

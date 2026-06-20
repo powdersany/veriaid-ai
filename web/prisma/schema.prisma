@@ -1,14 +1,14 @@
 // VeriAid AI — Database schema
 // 7 models: User, AidProgram, FundRecord, Expense, Evidence, Analysis, ProofLedger
-// Uses SQLite for local dev (zero-config). Switch to PostgreSQL by changing
-// `provider` to "postgresql" and updating DATABASE_URL.
+// Uses PostgreSQL for production (Neon via Vercel integration).
+// For local dev with SQLite, change provider to "sqlite" and DATABASE_URL to "file:./dev.db".
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
