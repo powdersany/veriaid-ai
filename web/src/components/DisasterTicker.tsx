@@ -31,7 +31,7 @@ export async function DisasterTicker() {
           {events.map((ev) => (
             <Link
               key={ev.id}
-              href={`/d/${ev.id}`}
+              href={`/earthquake/${ev.id}`}
               className="group flex gap-4 p-4 bg-white border border-ink-200 rounded-xl hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] hover:border-teal-500/30 transition-all"
             >
               {/* Magnitude badge */}

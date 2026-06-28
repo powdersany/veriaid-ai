@@ -82,7 +82,7 @@ export function DisasterNewsCard({ event }: { event: DisasterEvent }) {
         {/* Action buttons */}
         <div className="flex items-center gap-2 pt-3 border-t border-ink-200">
           <Link
-            href={`/d/${event.id}`}
+            href={`/earthquake/${event.id}`}
             className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-white bg-teal-800 rounded-lg hover:bg-teal-900 transition-colors"
           >
             <svg className="w-4 h-4" viewBox="0 0 20 20" fill="none">
