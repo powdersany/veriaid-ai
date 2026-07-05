@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { DashboardShell } from "@/components/DashboardShell";
 import { ShareModal } from "@/components/ShareModal";
+import { DisasterNewsCard } from "@/components/DisasterNewsCard";
 import { mockPrograms, formatRupiah, getProgress, statusLabel, statusColor } from "@/lib/mock-data";
 import { prisma } from "@/lib/db";
+import { fetchRecentEarthquakes } from "@/lib/disasters";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -51,6 +53,7 @@ export default async function DashboardOverviewPage() {
   const avgAiScore = dbStats?.avgAiScore ?? Math.round(mockPrograms.reduce((s, p) => s + p.aiScore, 0) / mockPrograms.length);
   const pendingReview = dbStats?.pendingReview ?? mockPrograms.filter((p) => p.status === "pending_review").length;
   const verifiedCount = dbStats?.verifiedCount ?? mockPrograms.filter((p) => p.status === "verified").length;
+  const earthquakes = (await fetchRecentEarthquakes()).slice(0, 3);
   return (
     <DashboardShell>
       <div className="max-w-6xl mx-auto">
@@ -119,6 +122,31 @@ export default async function DashboardOverviewPage() {
             </div>
           </div>
         </div>
+
+        {/* Disaster news feed */}
+        {earthquakes.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-danger" />
+                </span>
+                <h2 className="font-display text-lg font-bold text-ink-900">
+                  Berita Bencana Terbaru
+                </h2>
+              </div>
+              <span className="text-[10px] font-semibold text-ink-400 bg-ink-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                BMKG
+              </span>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {earthquakes.map((ev) => (
+                <DisasterNewsCard key={ev.id} event={ev} />
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="bg-white rounded-2xl border border-ink-200 overflow-hidden">
           <div className="p-5 lg:p-6 border-b border-ink-200 flex items-center justify-between gap-4">
