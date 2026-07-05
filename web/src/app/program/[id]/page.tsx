@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { QrisButton, TransferButton } from "@/components/PaymentInfoModal";
 import { prisma } from "@/lib/db";
 import { mockPrograms, formatRupiah, getProgress, statusLabel, statusColor } from "@/lib/mock-data";
 import type { Metadata } from "next";
@@ -152,6 +153,10 @@ export default async function ProgramDetailPage({ params }: PageProps) {
                   </svg>
                   Lihat Bukti Blockchain
                 </Link>
+                <div className="mt-3 grid gap-2">
+                  <QrisButton programTitle={program.title} />
+                  <TransferButton programTitle={program.title} />
+                </div>
               </div>
             </div>
           </div>
