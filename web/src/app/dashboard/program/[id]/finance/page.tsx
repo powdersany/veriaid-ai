@@ -4,16 +4,17 @@ import { useState, useEffect, type FormEvent } from "react";
 import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
 import { DashboardShell } from "@/components/DashboardShell";
-import { mockPrograms, formatRupiah, getProgress } from "@/lib/mock-data";
+import { mockPrograms, formatRupiah } from "@/lib/mock-data";
 import { programsApi } from "@/lib/api-client";
-import type { Expense } from "@/lib/types";
+import type { AidProgram, Expense } from "@/lib/types";
 
 const categories = ["Paket Bantuan", "Logistik", "Operasional", "SDM"];
 
 export default function FinancePage() {
   const params = useParams<{ id: string }>();
-  const program = mockPrograms.find((p) => p.id === params.id);
+  const fallbackProgram = mockPrograms.find((p) => p.id === params.id);
 
+  const [program, setProgram] = useState<AidProgram | typeof fallbackProgram | null>(fallbackProgram ?? null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -30,6 +31,7 @@ export default function FinancePage() {
     programsApi
       .get(params.id)
       .then((r) => {
+        setProgram(r.program);
         setExpenses(
           r.expenses.map((e) => ({
             id: e.id,
@@ -51,6 +53,14 @@ export default function FinancePage() {
       })
       .finally(() => setLoading(false));
   }, [params.id]);
+
+  if (loading && !program) {
+    return (
+      <DashboardShell>
+        <div className="max-w-5xl mx-auto text-sm text-ink-500">Memuat program...</div>
+      </DashboardShell>
+    );
+  }
 
   if (!program) {
     notFound();

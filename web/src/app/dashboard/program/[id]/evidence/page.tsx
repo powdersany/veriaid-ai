@@ -6,7 +6,7 @@ import { notFound, useParams } from "next/navigation";
 import { DashboardShell } from "@/components/DashboardShell";
 import { mockPrograms } from "@/lib/mock-data";
 import { programsApi } from "@/lib/api-client";
-import type { Evidence } from "@/lib/types";
+import type { AidProgram, Evidence } from "@/lib/types";
 
 type EvidenceType = "foto" | "nota" | "invoice" | "laporan" | "dokumen";
 
@@ -50,9 +50,11 @@ function toLocal(e: Evidence): LocalEvidence {
 
 export default function EvidencePage() {
   const params = useParams<{ id: string }>();
-  const program = mockPrograms.find((p) => p.id === params.id);
+  const fallbackProgram = mockPrograms.find((p) => p.id === params.id);
 
+  const [program, setProgram] = useState<AidProgram | typeof fallbackProgram | null>(fallbackProgram ?? null);
   const [items, setItems] = useState<LocalEvidence[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedType, setSelectedType] = useState<EvidenceType>("foto");
 
@@ -61,14 +63,26 @@ export default function EvidencePage() {
     if (!params.id) return;
     programsApi
       .get(params.id)
-      .then((r) => setItems(r.evidence.map(toLocal)))
+      .then((r) => {
+        setProgram(r.program);
+        setItems(r.evidence.map(toLocal));
+      })
       .catch(() => {
         try {
           const cached = localStorage.getItem(`veriaid:evidence:${params.id}`);
           if (cached) setItems(JSON.parse(cached));
         } catch {}
-      });
+      })
+      .finally(() => setLoading(false));
   }, [params.id]);
+
+  if (loading && !program) {
+    return (
+      <DashboardShell>
+        <div className="max-w-5xl mx-auto text-sm text-ink-500">Memuat program...</div>
+      </DashboardShell>
+    );
+  }
 
   if (!program) {
     notFound();
