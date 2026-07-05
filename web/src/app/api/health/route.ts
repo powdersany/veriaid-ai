@@ -21,6 +21,6 @@ export async function GET() {
     time: new Date().toISOString(),
     db: { ok: dbOk, error: dbError },
     ai: { configured: isAIConfigured() },
-    auth: { configured: Boolean(process.env.JWT_SECRET) },
+    auth: { configured: Boolean(process.env.JWT_SECRET ?? process.env.NEXTAUTH_SECRET) },
   });
 }

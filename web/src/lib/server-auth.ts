@@ -10,7 +10,9 @@ import { cookies, headers } from "next/headers";
 import { prisma } from "./db";
 
 const JWT_SECRET_RAW =
-  process.env.JWT_SECRET ?? "veriaid-dev-secret-change-me-in-production-please";
+  process.env.JWT_SECRET ??
+  process.env.NEXTAUTH_SECRET ??
+  "veriaid-dev-secret-change-me-in-production-please";
 const JWT_SECRET = new TextEncoder().encode(JWT_SECRET_RAW);
 const JWT_ALG = "HS256";
 const JWT_TTL = "7d";

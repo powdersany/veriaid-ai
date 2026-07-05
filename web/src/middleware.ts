@@ -3,7 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 const COOKIE_NAME = "veriaid_session";
 const SECRET = new TextEncoder().encode(
-  process.env.NEXTAUTH_SECRET ?? "veriaid-dev-secret-change-me-in-production-please",
+  process.env.JWT_SECRET ??
+    process.env.NEXTAUTH_SECRET ??
+    "veriaid-dev-secret-change-me-in-production-please",
 );
 
 const protectedPrefixes = ["/dashboard", "/admin"];
