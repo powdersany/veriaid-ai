@@ -49,7 +49,7 @@ export const authApi = {
     name: string;
     email: string;
     password: string;
-    role: "organization" | "volunteer";
+    role: "organization" | "admin";
     organization?: string;
   }) {
     return request<{ user: import("./types").User }>("/api/auth/signup", {
@@ -88,7 +88,7 @@ export const programsApi = {
       proof: import("./types").ProofEvent[];
     }>(`/api/programs/${id}`);
   },
-  async create(data: Partial<import("./types").AidProgram>) {
+  async create(data: Partial<import("./types").AidProgram> & { context?: Record<string, string> }) {
     return request<{ program: import("./types").AidProgram }>("/api/programs", {
       method: "POST",
       body: JSON.stringify(data),

@@ -145,11 +145,11 @@ export default async function DonatePage({ params }: PageProps) {
             </div>
 
             <div className="p-6 lg:p-8 flex flex-wrap gap-3 justify-end bg-ink-50/50">
-              <QrisButton programTitle={program.title} />
-              <TransferButton programTitle={program.title} />
+              <QrisButton programTitle={program.title} className="w-full sm:w-auto" />
+              <TransferButton programTitle={program.title} className="w-full sm:w-auto" />
               <button
                 type="button"
-                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-ink-800 bg-white border border-ink-200 rounded-lg hover:border-teal-500 hover:text-teal-800 hover:bg-ink-50 transition-all"
+                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-ink-800 bg-white border border-ink-200 rounded-lg hover:border-teal-500 hover:text-teal-800 hover:bg-ink-50 transition-all w-full sm:w-auto"
               >
                 <svg className="w-4 h-4" viewBox="0 0 20 20" fill="none">
                   <path
@@ -369,8 +369,8 @@ export default async function DonatePage({ params }: PageProps) {
               saja.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
-              <QrisButton programTitle={program.title} />
-              <TransferButton programTitle={program.title} />
+              <QrisButton programTitle={program.title} className="w-full sm:w-auto" />
+              <TransferButton programTitle={program.title} className="w-full sm:w-auto" />
             </div>
             <p className="text-xs text-white/50 mt-6 tracking-wider">
               Hackathon MVP v1.0 · Payment gateway coming soon

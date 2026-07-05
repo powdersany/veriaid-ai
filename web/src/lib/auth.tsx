@@ -17,7 +17,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: "organization" | "volunteer";
+  role: "organization" | "admin";
   organization?: string | null;
   createdAt?: string;
 }
@@ -32,7 +32,7 @@ interface AuthState {
     name: string;
     email: string;
     password: string;
-    role: "organization" | "volunteer";
+    role: "organization" | "admin";
     organization?: string;
   }) => Promise<{ ok: boolean; error?: string }>;
   signOut: () => Promise<void>;

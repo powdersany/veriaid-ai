@@ -12,7 +12,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"organization" | "volunteer">("organization");
+  const [role, setRole] = useState<"organization" | "admin">("organization");
   const [organization, setOrganization] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -139,9 +139,9 @@ export default function RegisterPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setRole("volunteer")}
+                    onClick={() => setRole("admin")}
                     className={`p-3 text-sm font-semibold rounded-lg border-2 transition-all ${
-                      role === "volunteer"
+                      role === "admin"
                         ? "border-teal-500 bg-teal-50 text-teal-800"
                         : "border-ink-200 text-ink-600 hover:border-ink-300"
                     }`}
@@ -165,7 +165,7 @@ export default function RegisterPage() {
                         strokeLinecap="round"
                       />
                     </svg>
-                    Relawan
+                    Admin
                   </button>
                 </div>
               </div>

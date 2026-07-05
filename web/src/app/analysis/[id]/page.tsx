@@ -140,11 +140,12 @@ export default function AnalysisPage() {
 
         {loading ? (
           <div className="bg-white rounded-2xl border border-ink-200 p-12 text-center text-ink-500">
-            <svg className="w-8 h-8 animate-spin mx-auto mb-3 text-teal-700" viewBox="0 0 20 20" fill="none">
-              <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="2" strokeOpacity="0.25" />
-              <path d="M17 10a7 7 0 00-7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-            Memuat analisis…
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-ink-200 rounded w-3/4 mx-auto"></div>
+              <div className="h-4 bg-ink-100 rounded w-1/2 mx-auto"></div>
+              <div className="h-20 bg-ink-50 rounded-lg mx-auto"></div>
+              <div className="h-4 bg-ink-100 rounded w-2/3 mx-auto"></div>
+            </div>
           </div>
         ) : !hasAnalysis ? (
           <div className="bg-white rounded-2xl border border-ink-200 p-12 text-center">

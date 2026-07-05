@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   const name = String(body.name ?? "").trim();
   const email = String(body.email ?? "").trim().toLowerCase();
   const password = String(body.password ?? "");
-  const role = String(body.role ?? "organization") === "volunteer" ? "volunteer" : "organization";
+  const role = String(body.role ?? "organization") === "admin" ? "admin" : "organization";
   const organization = body.organization ? String(body.organization) : null;
 
   if (!name || !email || !password) {

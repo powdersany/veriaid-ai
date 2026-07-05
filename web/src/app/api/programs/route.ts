@@ -63,6 +63,7 @@ export async function POST(request: Request) {
   const aidType = String(body.aidType ?? "").trim();
   const startDate = body.startDate ? new Date(String(body.startDate)) : new Date();
   const organizer = String(body.organizer ?? user.organization ?? user.name).trim();
+  const context = typeof body.context === "object" && body.context ? body.context : {};
 
   if (!title || !category || !location) {
     return NextResponse.json(
@@ -111,6 +112,7 @@ export async function POST(request: Request) {
     targetFund: program.targetFund,
     organizer: program.organizer,
     ownerId: user.id,
+    context,
   };
   const currentHash = computeEventHash("PROGRAM_CREATED", ts, data, GENESIS);
   await prisma.proofLedger.create({

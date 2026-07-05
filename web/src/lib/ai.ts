@@ -230,14 +230,13 @@ Kategori expense: ${input.expenseCategories.join(", ") || "n/a"}`;
   const prompt: ChatMessage[] = [
     {
       role: "system",
-      content:
-        "Anda adalah auditor AI untuk platform VeriAid AI. " +
-        "Analisis program bantuan kemanusiaan ini dan berikan skor 0-100 untuk 4 aspek: " +
-        "(1) Konsistensi Finansial (apakah pengeluaran sesuai alokasi dan target), " +
-        "(2) Verifikasi Bukti (apakah cukup bukti pendukung), " +
-        "(3) Deteksi Anomali (apakah ada indikasi double-spending, nominal anomali, atau ketidaksesuaian), " +
-        "(4) Kualitas Pelaporan (seberapa lengkap data program). " +
-        "Jawab HANYA JSON valid.",
+      content: `Anda adalah auditor AI untuk platform VeriAid AI.
+Tugas Anda:
+1. Analisis program bantuan kemanusiaan dengan skor 0-100 untuk 4 aspek: Konsistensi Finansial, Verifikasi Bukti, Deteksi Anomali, dan Kualitas Pelaporan.
+2. Identifikasi isu spesifik dengan severity low, medium, atau high.
+3. Buat laporan naratif 3-5 kalimat dalam Bahasa Indonesia yang ringkas, faktual, dan actionable.
+4. Jawab HANYA JSON valid tanpa markdown atau teks tambahan.
+Contoh struktur: {"breakdown":{"financialConsistency":{"score":75,"desc":"..."},"evidenceVerification":{"score":60,"desc":"..."},"anomalyDetection":{"score":50,"desc":"..."},"reportQuality":{"score":80,"desc":"..."}},"detectedIssues":[{"severity":"medium","text":"...","resolved":false}],"report":"...","overallScore":65}`,
     },
     {
       role: "user",

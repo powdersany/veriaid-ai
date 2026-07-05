@@ -21,6 +21,9 @@ export default function CreateProgramPage() {
     targetBeneficiary: "",
     aidType: "",
     targetFund: "",
+    newsUrl: "",
+    verificationSource: "",
+    disasterPhoto: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +35,21 @@ export default function CreateProgramPage() {
   const canNext1 = form.title && form.category && form.location;
   const canNext2 = form.description && form.targetBeneficiary && form.aidType;
   const canSubmit = form.targetFund;
+
+  const autoFillWithAgent = () => {
+    setForm({
+      title: "Bantuan Banjir Demak 2026",
+      category: "Bencana Alam",
+      location: "Demak, Jawa Tengah",
+      description: "Distribusi paket makanan, air bersih, obat-obatan, dan hygiene kit untuk keluarga terdampak banjir di tiga kecamatan prioritas.",
+      targetBeneficiary: "500",
+      aidType: "Paket Makanan + Air Bersih",
+      targetFund: "10000000",
+      newsUrl: "https://news.detik.com/berita/contoh-banjir-demak",
+      verificationSource: "BPBD Demak, laporan relawan lapangan, dan media lokal",
+      disasterPhoto: "https://images.unsplash.com/photo-1547683905-f686c993aae5",
+    });
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -51,6 +69,11 @@ export default function CreateProgramPage() {
         aidType: form.aidType,
         targetFund: Number(form.targetFund) || 0,
         status: "pending_review",
+        context: {
+          newsUrl: form.newsUrl,
+          verificationSource: form.verificationSource,
+          disasterPhoto: form.disasterPhoto,
+        },
       });
       router.push(`/dashboard/program/${created.program.slug}/finance`);
     } catch (err) {
@@ -69,6 +92,13 @@ export default function CreateProgramPage() {
           <p className="text-ink-500 mt-1">
             Isi detail program bantuan Anda. Bisa diedit setelah dibuat.
           </p>
+          <button
+            type="button"
+            onClick={autoFillWithAgent}
+            className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-teal-900 bg-gradient-to-r from-amber-100 to-teal-100 border border-teal-200 rounded-xl hover:shadow-md transition-all"
+          >
+            * Auto-Fill with VeriAid Agent
+          </button>
         </div>
 
         <div className="mb-6 flex items-center gap-2">
@@ -102,6 +132,7 @@ export default function CreateProgramPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-ink-200 p-6 lg:p-8">
+          {error && <div className="mb-5 p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">{error}</div>}
           {step === 1 && (
             <div className="space-y-5">
               <h2 className="font-display text-lg font-bold text-ink-900 mb-4">
@@ -204,6 +235,37 @@ export default function CreateProgramPage() {
                   value={form.aidType}
                   onChange={(e) => update("aidType", e.target.value)}
                   placeholder="Paket Makanan + Air Bersih"
+                  className={inputClass}
+                />
+              </Field>
+
+              <div className="grid sm:grid-cols-2 gap-4 pt-2">
+                <Field label="News URL" help="Link berita atau laporan publik sebagai sumber konteks">
+                  <input
+                    type="url"
+                    value={form.newsUrl}
+                    onChange={(e) => update("newsUrl", e.target.value)}
+                    placeholder="https://media.id/berita-bencana"
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label="Source" help="BPBD, NGO partner, relawan, atau media">
+                  <input
+                    type="text"
+                    value={form.verificationSource}
+                    onChange={(e) => update("verificationSource", e.target.value)}
+                    placeholder="BPBD + relawan lapangan"
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+
+              <Field label="Foto Bencana" help="URL foto referensi untuk presentasi/verifikasi awal">
+                <input
+                  type="url"
+                  value={form.disasterPhoto}
+                  onChange={(e) => update("disasterPhoto", e.target.value)}
+                  placeholder="https://.../foto-bencana.jpg"
                   className={inputClass}
                 />
               </Field>

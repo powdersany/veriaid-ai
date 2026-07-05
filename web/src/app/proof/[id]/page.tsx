@@ -54,16 +54,20 @@ export default async function ProofPage({ params }: PageProps) {
   const { id } = await params;
   const program = await getProgram(id);
   if (!program) {
-    // Fall back to mock data so static export still works on Vercel
     const fallback = mockPrograms.find((p) => p.id === id);
     if (!fallback) notFound();
     return <MockProofCard id={id} />;
   }
 
-  const events = await prisma.proofLedger.findMany({
-    where: { programId: program.id },
-    orderBy: { sequence: "asc" },
-  });
+  let events;
+  try {
+    events = await prisma.proofLedger.findMany({
+      where: { programId: program.id },
+      orderBy: { sequence: "asc" },
+    });
+  } catch (e) {
+    return <ProofError message={e instanceof Error ? e.message : "Gagal memuat hash chain"} />;
+  }
 
   // Reverse for display (newest first), but keep the chain data
   const displayEvents = [...events].reverse();
@@ -186,20 +190,33 @@ export default async function ProofPage({ params }: PageProps) {
                   </div>
                 ) : (
                   displayEvents.map((e) => (
-                    <div key={e.id} className="flex items-center gap-4 p-4 hover:bg-ink-50 transition-colors">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-500/10 text-teal-700 flex items-center justify-center text-xs font-bold">
-                        #{e.sequence}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-ink-900">
-                          {e.eventType.replace(/_/g, " ")}
+                    <div key={e.id} className="p-5 hover:bg-ink-50 transition-colors">
+                      <div className="flex flex-wrap items-start gap-4">
+                        <div className="flex-shrink-0 w-9 h-9 rounded-full bg-teal-500/10 text-teal-700 flex items-center justify-center text-xs font-bold">
+                          #{e.sequence}
                         </div>
-                        <code className="text-xs text-ink-500 font-mono break-all">
-                          {shortHash(e.currentHash, 10, 8)}
-                        </code>
-                      </div>
-                      <div className="text-xs text-ink-500 hidden sm:block whitespace-nowrap">
-                        {formatDate(e.timestamp.toISOString())}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="text-sm font-semibold text-ink-900">
+                              {e.eventType.replace(/_/g, " ")}
+                            </div>
+                            <div className="text-xs text-ink-500 whitespace-nowrap">
+                              {formatDate(e.timestamp.toISOString())}
+                            </div>
+                          </div>
+                          <div className="mt-3 grid gap-3">
+                            <HashLine label="Previous Hash" value={e.previousHash} subtle />
+                            <HashLine label="Current Hash" value={e.currentHash} />
+                            <div>
+                              <div className="text-[10px] font-bold text-ink-400 uppercase tracking-wider mb-1">
+                                Raw Data / Payload
+                              </div>
+                              <pre className="max-h-40 overflow-auto rounded-xl bg-ink-950 p-3 text-[11px] leading-relaxed text-green-300 whitespace-pre-wrap break-all">
+                                {JSON.stringify(JSON.parse(e.data), null, 2)}
+                              </pre>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))
@@ -225,10 +242,6 @@ export default async function ProofPage({ params }: PageProps) {
   );
 }
 
-function VerifyButtonHash({ hash }: { hash: string }) {
-  return <VerifyButton valid={true} hash={hash} />;
-}
-
 function MockProofCard({ id }: { id: string }) {
   const fallback = mockPrograms.find((p) => p.id === id)!;
   return (
@@ -238,16 +251,127 @@ function MockProofCard({ id }: { id: string }) {
         <section className="section-spacing">
           <div className="container-page max-w-4xl">
             <Link href={`/program/${fallback.id}`} className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-teal-600 mb-6">
-              ← Kembali ke program
+              Kembali ke program
             </Link>
             <div className="bg-white rounded-2xl border border-ink-200 p-8 text-center">
               <h1 className="font-display text-2xl font-bold text-ink-900 mb-2">{fallback.title}</h1>
-              <p className="text-ink-500 text-sm">
-                Data program ada di mock fallback. Untuk proof chain real, jalankan database backend.
-              </p>
-              <code className="block mt-4 p-3 bg-ink-100 text-xs text-ink-700 rounded font-mono">
-                npm run db:reset && npm run dev
-              </code>
+              <p className="text-ink-500 text-sm">Data program ada di mock fallback. Untuk proof chain real, jalankan database backend.</p>
+              <code className="block mt-4 p-3 bg-ink-100 text-xs text-ink-700 rounded font-mono">npm run db:reset && npm run dev</code>
+            </div>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function ProofError({ message }: { message: string }) {
+  return (
+    <>
+      <Nav />
+      <main className="flex-1 bg-ink-50">
+        <section className="section-spacing">
+          <div className="container-page max-w-3xl">
+            <div className="bg-white rounded-2xl border border-red-200 p-8 text-center">
+              <h3 className="font-display text-lg font-bold text-red-800 mb-2">Gagal memuat bukti blockchain</h3>
+              <p className="text-sm text-red-600">{message}</p>
+            </div>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function HashLine({ label, value, subtle = false }: { label: string; value: string; subtle?: boolean }) {
+  return (
+    <div>
+      <div className="text-[10px] font-bold text-ink-400 uppercase tracking-wider mb-1">{label}</div>
+      <code className={`block rounded-lg px-3 py-2 text-[11px] font-mono break-all ${subtle ? "bg-ink-100 text-ink-600" : "bg-teal-50 text-teal-900"}`}>
+        {value}
+      </code>
+    </div>
+  );
+}
+
+function VerifyButtonHash({ hash }: { hash: string }) {
+  return <VerifyButton valid={true} hash={hash} />;
+}
+
+function ProofSkeleton() {
+  return (
+    <>
+      <Nav />
+      <main className="flex-1 bg-ink-50">
+        <section className="section-spacing">
+          <div className="container-page max-w-4xl">
+            <div className="animate-pulse space-y-6">
+              {/* Header */}
+              <div className="h-8 bg-ink-200 rounded w-1/3"></div>
+              <div className="h-6 bg-ink-100 rounded w-2/3"></div>
+
+              {/* Card Skeleton */}
+              <div className="bg-white rounded-3xl border border-ink-200 overflow-hidden">
+                <div className="p-6 sm:p-8 border-b border-ink-200 bg-gradient-to-br from-ink-50 to-white">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="space-y-2">
+                      <div className="h-4 bg-ink-200 rounded w-32"></div>
+                      <div className="h-6 bg-ink-100 rounded w-40"></div>
+                    </div>
+                    <div className="space-y-2 text-right">
+                      <div className="h-4 bg-ink-200 rounded w-24 ml-auto"></div>
+                      <div className="h-6 bg-ink-100 rounded w-32 ml-auto"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 sm:p-8 space-y-6">
+                  <div className="grid sm:grid-cols-2 gap-x-8 gap-y-5">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="space-y-2">
+                        <div className="h-4 bg-ink-200 rounded w-24"></div>
+                        <div className="h-6 bg-ink-100 rounded w-full"></div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-6 border-t border-ink-200">
+                    <div className="h-4 bg-ink-200 rounded w-48 mb-2"></div>
+                    <div className="h-16 bg-ink-100 rounded-lg"></div>
+                  </div>
+
+                  <div className="pt-6 border-t border-ink-200">
+                    <div className="h-4 bg-ink-200 rounded w-32 mb-2"></div>
+                    <div className="h-16 bg-ink-100 rounded-lg"></div>
+                  </div>
+
+                  <div className="pt-6 border-t border-ink-200">
+                    <div className="h-10 bg-teal-200 rounded-lg w-48 mx-auto"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Event Log Skeleton */}
+              <div className="bg-white rounded-2xl border border-ink-200 overflow-hidden">
+                <div className="p-6 border-b border-ink-200">
+                  <div className="h-6 bg-ink-200 rounded w-64"></div>
+                  <div className="h-4 bg-ink-100 rounded w-96 mt-2"></div>
+                </div>
+                <div className="divide-y divide-ink-200">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-4 p-4">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-ink-200"></div>
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <div className="h-4 bg-ink-200 rounded w-3/4"></div>
+                        <div className="h-3 bg-ink-100 rounded w-1/2"></div>
+                      </div>
+                      <div className="h-3 bg-ink-100 rounded w-24"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>

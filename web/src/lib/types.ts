@@ -1,7 +1,7 @@
 // Shared types for the API + frontend.
 
 export type ProgramStatus = "verified" | "in_progress" | "pending_review";
-export type UserRole = "organization" | "volunteer";
+export type UserRole = "organization" | "admin";
 export type EvidenceType = "foto" | "nota" | "invoice" | "laporan" | "dokumen";
 export type EvidenceStatus = "analyzed" | "pending" | "flagged";
 

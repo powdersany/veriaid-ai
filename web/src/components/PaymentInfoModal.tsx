@@ -18,6 +18,11 @@ export function PaymentInfoModal({
   method,
   programTitle,
 }: PaymentInfoModalProps) {
+  const [amount, setAmount] = useState("100000");
+  const [donorName, setDonorName] = useState("Anonim");
+  const [proofName, setProofName] = useState("");
+  const referenceCode = `VA-${programTitle.slice(0, 3).toUpperCase().replace(/[^A-Z]/g, "X")}-${Math.max(10000, Number(amount) || 0).toString().slice(-5)}`;
+
   if (!open) return null;
 
   return (
@@ -69,6 +74,27 @@ export function PaymentInfoModal({
           </p>
         </div>
 
+
+        <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label className="block">
+            <span className="text-xs font-bold text-ink-500 uppercase tracking-wider">Nominal</span>
+            <input type="number" min="10000" value={amount} onChange={(e) => setAmount(e.target.value)} className="mt-1 w-full px-3 py-2 border border-ink-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30" />
+          </label>
+          <label className="block">
+            <span className="text-xs font-bold text-ink-500 uppercase tracking-wider">Nama Donor</span>
+            <input type="text" value={donorName} onChange={(e) => setDonorName(e.target.value || "Anonim")} placeholder="Anonim" className="mt-1 w-full px-3 py-2 border border-ink-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30" />
+          </label>
+          <div className="sm:col-span-2 p-3 rounded-xl bg-ink-50 border border-ink-200">
+            <div className="text-xs text-ink-500">Kode Unik Referensi</div>
+            <div className="font-mono font-bold text-teal-800">{referenceCode}</div>
+          </div>
+          <label className="sm:col-span-2 block">
+            <span className="text-xs font-bold text-ink-500 uppercase tracking-wider">Upload Bukti Transfer</span>
+            <input type="file" accept="image/*,.pdf" onChange={(e) => setProofName(e.target.files?.[0]?.name ?? "")} className="mt-1 w-full text-sm text-ink-600 file:mr-3 file:px-3 file:py-2 file:border-0 file:rounded-lg file:bg-teal-50 file:text-teal-800 file:font-semibold" />
+            {proofName && <span className="mt-1 block text-xs text-success">Bukti siap dikirim: {proofName}</span>}
+          </label>
+        </div>
+
         {method === "qris" && (
           <div className="space-y-4">
             <div className="flex justify-center">
@@ -84,7 +110,7 @@ export function PaymentInfoModal({
               </div>
             </div>
             <div className="text-center text-sm text-ink-600">
-              Scan QR di atas dengan aplikasi e-wallet (GoPay, OVO, Dana, ShopeePay)
+              Scan QR untuk donasi Rp {Number(amount || 0).toLocaleString("id-ID")} sebagai {donorName || "Anonim"}
             </div>
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
               <strong>Demo:</strong> QR ini placeholder. VeriAid AI akan generate
@@ -117,9 +143,7 @@ export function PaymentInfoModal({
               />
             </div>
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
-              <strong>Demo:</strong> Nomor rekening di atas placeholder. Setiap
-              donasi via transfer akan otomatis tercatat dengan SHA-256 hash
-              + bukti transfer di blockchain.
+              <strong>Demo:</strong> Nomor rekening placeholder. Cantumkan kode {referenceCode} agar dashboard organisasi bisa memverifikasi donasi manual.
             </div>
           </div>
         )}
