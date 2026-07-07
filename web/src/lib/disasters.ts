@@ -66,8 +66,12 @@ function shortLocation(wilayah: string): string {
     .trim();
 }
 
-function extractIdFromShakemap(shakemap?: string): string {
-  if (!shakemap) return Date.now().toString();
+function extractIdFromShakemap(shakemap?: string, dateTime?: string, coordinates?: string): string {
+  if (!shakemap) {
+    const fromDate = dateTime?.replace(/\D/g, "");
+    const fromCoordinates = coordinates?.replace(/[^\d-]/g, "");
+    return [fromDate, fromCoordinates].filter(Boolean).join("-") || "unknown";
+  }
   return shakemap.replace(/\..*$/, ""); // "20260628041033"
 }
 
@@ -82,7 +86,7 @@ function formatTime(jam: string): string {
 }
 
 function gempaToEvent(g: BmkgGempa): DisasterEvent {
-  const id = extractIdFromShakemap(g.Shakemap);
+  const id = extractIdFromShakemap(g.Shakemap, g.DateTime, g.Coordinates);
   return {
     id,
     title: buildTitle(g.Magnitude, g.Wilayah),

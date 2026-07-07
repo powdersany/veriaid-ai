@@ -51,8 +51,7 @@ export function TechSection() {
             Teknologi
           </span>
           <h2 className="font-display font-extrabold text-[clamp(1.875rem,4vw,2.75rem)] leading-tight tracking-tight text-white mt-4">
-            Ditenagai <span className="text-gradient">AI</span> & diamankan{" "}
-            <span className="text-gradient">Blockchain</span>
+            Ditenagai AI & diamankan Blockchain
           </h2>
         </div>
 

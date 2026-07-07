@@ -32,7 +32,7 @@ export default function CreateProgramPage() {
     setForm((f) => ({ ...f, [key]: value }));
   };
 
-  const canNext1 = form.title && form.category && form.location;
+  const canNext1 = form.title && form.category !== "Semua" && form.location;
   const canNext2 = form.description && form.targetBeneficiary && form.aidType;
   const canSubmit = form.targetFund;
 
@@ -162,7 +162,7 @@ export default function CreateProgramPage() {
                 >
                   {categories.map((c) => (
                     <option key={c} value={c}>
-                      {c}
+                      {c === "Semua" ? "Pilih kategori" : c}
                     </option>
                   ))}
                 </select>

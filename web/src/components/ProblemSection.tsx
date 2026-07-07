@@ -83,8 +83,7 @@ export function ProblemSection() {
             Masalahnya
           </span>
           <h2 className="font-display font-extrabold text-[clamp(1.875rem,4vw,2.75rem)] leading-tight tracking-tight text-ink-900 mt-4">
-            Dana bantuan terkumpul. Tapi{" "}
-            <span className="text-gradient">kepercayaan sulit dibuktikan</span>.
+            Dana bantuan terkumpul. Tapi kepercayaan sulit dibuktikan.
           </h2>
           <p className="text-lg text-ink-500 mt-4 leading-relaxed">
             Banyak program bantuan berhasil mengumpulkan donasi, tapi setelah

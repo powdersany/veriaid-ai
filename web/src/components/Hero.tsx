@@ -27,8 +27,7 @@ export function Hero() {
             Bertenaga AI · Terverifikasi Blockchain
           </span>
           <h1 className="font-display font-extrabold text-[clamp(2.25rem,5vw,3.75rem)] leading-[1.08] tracking-tight text-ink-900 mt-6">
-            Buktikan setiap kebaikan secara{" "}
-            <span className="text-gradient">transparan</span>, akuntabel, dan
+            Buktikan setiap kebaikan secara transparan, akuntabel, dan
             tepercaya.
           </h1>
           <p className="text-[clamp(1rem,1.4vw,1.125rem)] text-ink-500 leading-relaxed mt-6 max-w-xl">
@@ -38,7 +37,7 @@ export function Hero() {
           </p>
           <div className="flex flex-wrap gap-3 mt-8">
             <a
-              href="#programs"
+              href="/programs"
               className="inline-flex items-center gap-2 px-7 py-3.5 text-base font-semibold text-white bg-teal-800 rounded-lg hover:bg-teal-900 transition-all shadow-[var(--shadow-glow)] hover:-translate-y-0.5"
             >
               Lihat Program Bantuan
@@ -58,7 +57,7 @@ export function Hero() {
               </svg>
             </a>
             <a
-              href="#verify"
+              href="/programs"
               className="inline-flex items-center gap-2 px-7 py-3.5 text-base font-semibold text-ink-800 bg-white border border-ink-200 rounded-lg hover:border-teal-500 hover:text-teal-800 hover:bg-ink-50 transition-all"
             >
               <svg
@@ -81,7 +80,7 @@ export function Hero() {
                   strokeLinejoin="round"
                 />
               </svg>
-              Verifikasi Laporan
+              Lihat Demo Verifikasi
             </a>
           </div>
           <div className="flex flex-wrap gap-6 sm:gap-10 pt-6 mt-8 border-t border-ink-200">

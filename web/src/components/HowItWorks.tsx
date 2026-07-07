@@ -30,9 +30,7 @@ export function HowItWorks() {
             Cara Kerja
           </span>
           <h2 className="font-display font-extrabold text-[clamp(1.875rem,4vw,2.75rem)] leading-tight tracking-tight text-ink-900 mt-4">
-            Dari donasi ke{" "}
-            <span className="text-gradient">dampak terverifikasi</span> dalam 5
-            langkah.
+            Dari donasi ke dampak terverifikasi dalam 5 langkah.
           </h2>
         </div>
 

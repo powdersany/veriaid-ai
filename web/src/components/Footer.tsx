@@ -23,8 +23,8 @@ export function Footer() {
             <Link href="/programs" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
               Program Bantuan
             </Link>
-            <Link href="/#verify" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
-              Verifikasi Laporan
+            <Link href="/programs" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
+              Lihat Demo Verifikasi
             </Link>
             <Link href="/register" className="block text-[0.9375rem] py-1.5 hover:text-white transition-colors">
               Untuk Organisasi

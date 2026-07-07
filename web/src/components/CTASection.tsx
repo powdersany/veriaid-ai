@@ -10,9 +10,7 @@ export function CTASection() {
             aria-hidden="true"
           />
           <h2 className="relative font-display font-extrabold text-[clamp(1.75rem,4vw,2.75rem)] leading-tight tracking-tight max-w-2xl mx-auto">
-            Siap membawa{" "}
-            <span className="text-gradient">transparansi</span> ke program
-            bantuan Anda?
+            Siap membawa transparansi ke program bantuan Anda?
           </h2>
           <p className="relative text-lg text-white/85 max-w-xl mx-auto mt-4">
             Mulai gratis untuk program komunitas. Skala ke NGO besar & CSR

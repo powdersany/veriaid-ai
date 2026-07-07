@@ -27,6 +27,21 @@ export default function LoginPage() {
     }
   };
 
+  const handleDemoLogin = async (demoEmail: string) => {
+    const demoPassword = "veriaid2026";
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+    setError(null);
+    setLoading(true);
+    const result = await signIn(demoEmail, demoPassword);
+    setLoading(false);
+    if (result.ok) {
+      router.push("/dashboard");
+    } else {
+      setError(result.error ?? "Login demo gagal.");
+    }
+  };
+
   return (
     <main className="min-h-screen flex flex-col bg-ink-50">
       <div className="container-page py-6">
@@ -159,11 +174,9 @@ export default function LoginPage() {
             <div className="space-y-2">
               <button
                 type="button"
-                onClick={() => {
-                  setEmail("demo@veriaid.ai");
-                  setPassword("veriaid2026");
-                }}
-                className="w-full flex items-center justify-between p-3 bg-white rounded-lg border border-teal-200 hover:border-teal-500 hover:bg-teal-50 transition-colors text-left group"
+                onClick={() => handleDemoLogin("demo@veriaid.ai")}
+                disabled={loading}
+                className="w-full flex items-center justify-between p-3 bg-white rounded-lg border border-teal-200 hover:border-teal-500 hover:bg-teal-50 disabled:opacity-60 transition-colors text-left group"
               >
                 <div>
                   <div className="text-sm font-semibold text-ink-900">
@@ -174,16 +187,14 @@ export default function LoginPage() {
                   </div>
                 </div>
                 <span className="text-xs font-semibold text-teal-700 group-hover:text-teal-900">
-                  Isi →
+                  Masuk →
                 </span>
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setEmail("volunteer@veriaid.ai");
-                  setPassword("veriaid2026");
-                }}
-                className="w-full flex items-center justify-between p-3 bg-white rounded-lg border border-teal-200 hover:border-teal-500 hover:bg-teal-50 transition-colors text-left group"
+                onClick={() => handleDemoLogin("volunteer@veriaid.ai")}
+                disabled={loading}
+                className="w-full flex items-center justify-between p-3 bg-white rounded-lg border border-teal-200 hover:border-teal-500 hover:bg-teal-50 disabled:opacity-60 transition-colors text-left group"
               >
                 <div>
                   <div className="text-sm font-semibold text-ink-900">
@@ -194,7 +205,7 @@ export default function LoginPage() {
                   </div>
                 </div>
                 <span className="text-xs font-semibold text-teal-700 group-hover:text-teal-900">
-                  Isi →
+                  Masuk →
                 </span>
               </button>
             </div>

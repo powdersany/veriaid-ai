@@ -32,8 +32,7 @@ export function SolutionSection() {
             Solusinya
           </span>
           <h2 className="font-display font-extrabold text-[clamp(1.875rem,4vw,2.75rem)] leading-tight tracking-tight text-ink-900 mt-4">
-            Satu platform.{" "}
-            <span className="text-gradient">Akuntabilitas menyeluruh</span>.
+            Satu platform. Akuntabilitas menyeluruh.
           </h2>
           <p className="text-lg text-ink-500 mt-4 leading-relaxed">
             VeriAid mengubah bukti bantuan yang tersebar menjadi laporan
